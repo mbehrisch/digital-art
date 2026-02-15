@@ -9,12 +9,19 @@ export function useCanvas(): CanvasManager {
 
 export function CanvasProvider({ children }: { children: ReactNode }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(canvasManager.initialized);
 
   useEffect(() => {
     if (!containerRef.current) return;
-    let cancelled = false;
 
+    // Already initialized (e.g., HMR preserved the singleton)
+    if (canvasManager.initialized) {
+      containerRef.current.appendChild(canvasManager.app.canvas as HTMLCanvasElement);
+      setReady(true);
+      return;
+    }
+
+    let cancelled = false;
     canvasManager.init(containerRef.current).then(() => {
       if (!cancelled) setReady(true);
     });

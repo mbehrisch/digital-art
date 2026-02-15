@@ -118,12 +118,17 @@ export abstract class Shape {
   /** Radius of the smallest circle enclosing this shape. */
   abstract getBoundingRadius(): number;
 
-  /** Circle-based intersection test between two shapes. */
-  intersects(other: Shape): boolean {
+  /** Euclidean distance to another shape's center. */
+  distanceTo(other: Shape): number {
     const dx = this.x - other.x;
     const dy = this.y - other.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  /** Circle-based intersection test between two shapes. */
+  intersects(other: Shape): boolean {
     const dist = this.getBoundingRadius() + other.getBoundingRadius();
-    return dx * dx + dy * dy < dist * dist;
+    return this.distanceTo(other) < dist;
   }
 
   destroy(): void {

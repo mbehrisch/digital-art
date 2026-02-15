@@ -17,6 +17,8 @@ export function ScenePage() {
       return;
     }
 
+    if (!canvas.initialized) return;
+
     const scene = entry.create();
     scene.setup(canvas);
     sceneRef.current = scene;

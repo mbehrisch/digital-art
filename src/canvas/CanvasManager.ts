@@ -1,8 +1,10 @@
 import { Application, type Container, type Ticker } from 'pixi.js';
+import { BACKGROUND } from '../theme/colors';
 
 export class CanvasManager {
   app: Application;
-  private initialized = false;
+  initialized = false;
+  private initPromise: Promise<void> | null = null;
 
   constructor() {
     this.app = new Application();
@@ -14,12 +16,16 @@ export class CanvasManager {
       return;
     }
 
-    await this.app.init({
-      resizeTo: window,
-      background: '#1a1a2e',
-      antialias: true,
-    });
+    // Deduplicate concurrent init calls (StrictMode double-invoke)
+    if (!this.initPromise) {
+      this.initPromise = this.app.init({
+        resizeTo: window,
+        background: BACKGROUND,
+        antialias: true,
+      });
+    }
 
+    await this.initPromise;
     container.appendChild(this.app.canvas as HTMLCanvasElement);
     this.initialized = true;
   }
@@ -40,8 +46,14 @@ export class CanvasManager {
     if (!this.initialized) return;
     this.app.destroy(true);
     this.initialized = false;
+    this.initPromise = null;
   }
 }
 
-// Singleton instance
-export const canvasManager = new CanvasManager();
+// Singleton instance — preserved across Vite HMR to avoid re-init
+export const canvasManager: CanvasManager =
+  (import.meta.hot?.data?.canvasManager as CanvasManager) ?? new CanvasManager();
+
+if (import.meta.hot) {
+  import.meta.hot.data.canvasManager = canvasManager;
+}
