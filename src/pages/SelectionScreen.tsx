@@ -25,7 +25,7 @@ function TimerBorder({ durationMs }: { durationMs: number }) {
     if (!parent) return;
 
     const { width, height } = parent.getBoundingClientRect();
-    console.log('[TimerBorder] parent size:', { width, height });
+
 
     if (width === 0 || height === 0) return;
 
@@ -42,7 +42,7 @@ function TimerBorder({ durationMs }: { durationMs: number }) {
     rect.setAttribute('ry', `${r}`);
 
     const perimeter = 2 * (width - 2 + height - 2) - 8 * r + 2 * Math.PI * r;
-    console.log('[TimerBorder] perimeter:', perimeter, 'animation:', `${durationMs}ms`);
+
     rect.style.strokeDasharray = `${perimeter}`;
     rect.style.strokeDashoffset = `${perimeter}`;
     rect.style.animation = `dash-fill ${durationMs}ms linear forwards`;
@@ -71,7 +71,7 @@ export function SelectionScreen() {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirstVisit = !hasVisitedScene;
   const [showHint, setShowHint] = useState(isFirstVisit);
-  console.log('[SelectionScreen] isFirstVisit:', isFirstVisit, 'showHint:', showHint);
+
 
   useEffect(() => {
     if (isFirstVisit && sceneRegistry.length > 0) {
