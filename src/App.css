@@ -52,8 +52,7 @@
 
 .timer-border-rect {
   fill: none;
-  stroke: #4ecdc4;
-  stroke-width: 2;
+  stroke-width: 2.5;
 }
 
 @keyframes dash-fill {
@@ -67,7 +66,7 @@
 }
 
 .scene-card:focus-visible {
-  outline: 2px solid #4ecdc4;
+  outline: 2px solid #a29bfe;
   outline-offset: 2px;
 }
 

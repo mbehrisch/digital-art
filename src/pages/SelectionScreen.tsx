@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { sceneRegistry } from '../scenes/SceneRegistry';
 
-const AUTO_LOAD_DELAY = 6000;
+const AUTO_LOAD_DELAY = 5000;
 const BORDER_RADIUS = 16;
+
+// Resets on page refresh, survives in-app navigation
+let hasVisitedScene = false;
+
+export function markSceneVisited() {
+  hasVisitedScene = true;
+}
 
 function TimerBorder({ durationMs }: { durationMs: number }) {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -18,6 +25,10 @@ function TimerBorder({ durationMs }: { durationMs: number }) {
     if (!parent) return;
 
     const { width, height } = parent.getBoundingClientRect();
+    console.log('[TimerBorder] parent size:', { width, height });
+
+    if (width === 0 || height === 0) return;
+
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
     svg.setAttribute('width', `${width}`);
     svg.setAttribute('height', `${height}`);
@@ -31,6 +42,7 @@ function TimerBorder({ durationMs }: { durationMs: number }) {
     rect.setAttribute('ry', `${r}`);
 
     const perimeter = 2 * (width - 2 + height - 2) - 8 * r + 2 * Math.PI * r;
+    console.log('[TimerBorder] perimeter:', perimeter, 'animation:', `${durationMs}ms`);
     rect.style.strokeDasharray = `${perimeter}`;
     rect.style.strokeDashoffset = `${perimeter}`;
     rect.style.animation = `dash-fill ${durationMs}ms linear forwards`;
@@ -42,21 +54,29 @@ function TimerBorder({ durationMs }: { durationMs: number }) {
       className="timer-border-svg"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect ref={rectRef} className="timer-border-rect" />
+      <defs>
+        <linearGradient id="timer-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#a29bfe" />
+          <stop offset="50%" stopColor="#fd79a8" />
+          <stop offset="100%" stopColor="#ff6b6b" />
+        </linearGradient>
+      </defs>
+      <rect ref={rectRef} className="timer-border-rect" stroke="url(#timer-gradient)" />
     </svg>
   );
 }
 
 export function SelectionScreen() {
   const navigate = useNavigate();
-  const location = useLocation();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isFirstVisit = !location.state?.fromScene;
+  const isFirstVisit = !hasVisitedScene;
   const [showHint, setShowHint] = useState(isFirstVisit);
+  console.log('[SelectionScreen] isFirstVisit:', isFirstVisit, 'showHint:', showHint);
 
   useEffect(() => {
     if (isFirstVisit && sceneRegistry.length > 0) {
       timerRef.current = setTimeout(() => {
+        markSceneVisited();
         navigate(`/scene/${sceneRegistry[0].id}`);
       }, AUTO_LOAD_DELAY);
     }
@@ -69,6 +89,7 @@ export function SelectionScreen() {
   const handleSelect = (id: string) => {
     if (timerRef.current) clearTimeout(timerRef.current);
     setShowHint(false);
+    markSceneVisited();
     navigate(`/scene/${id}`);
   };
 

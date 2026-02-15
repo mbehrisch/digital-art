@@ -28,7 +28,7 @@ export function ScenePage() {
   }, [id, canvas, navigate]);
 
   return (
-    <button className="back-button" onClick={() => navigate('/', { state: { fromScene: true } })}>
+    <button className="back-button" onClick={() => navigate('/')}>
       ← Back
     </button>
   );

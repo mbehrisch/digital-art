@@ -63,29 +63,38 @@ export class BouncingShapes extends Scene {
 
     // Animation loop - move shapes
     this.addTicker(() => {
+      // Move all shapes
       for (const shape of this.shapes) {
         shape.x += shape.vx;
         shape.y += shape.vy;
 
         if (shape.x < 0 || shape.x > w) shape.vx *= -1;
         if (shape.y < 0 || shape.y > h) shape.vy *= -1;
+      }
 
-        for (const shape of this.shapes) {
-          for (const other of this.shapes) {
-            if (shape !== other && shape.intersects(other)) {
-              // Swap velocities for bouncing effect
-              const tempVx = shape.vx;
-              const tempVy = shape.vy;
-              shape.vx = other.vx;
-              shape.vy = other.vy;
-              other.vx = tempVx;
-              other.vy = tempVy;
-            }
+      // Collision detection — check each pair once
+      for (let i = 0; i < this.shapes.length; i++) {
+        for (let j = i + 1; j < this.shapes.length; j++) {
+          const a = this.shapes[i];
+          const b = this.shapes[j];
+          if (a.intersects(b)) {
+            const tmpVx = a.vx;
+            const tmpVy = a.vy;
+            a.vx = b.vx;
+            a.vy = b.vy;
+            b.vx = tmpVx;
+            b.vy = tmpVy;
+            // Separate so they don't re-collide next frame
+            a.x += a.vx;
+            a.y += a.vy;
+            b.x += b.vx;
+            b.y += b.vy;
           }
         }
+      }
 
-
-
+      // Render all shapes
+      for (const shape of this.shapes) {
         shape.render();
       }
     });
